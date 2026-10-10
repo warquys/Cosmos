@@ -1,4 +1,19 @@
 #nullable enable
+Cosmos.Kernel.Core.CPU.ProcessTrapApi
+Cosmos.Kernel.Core.CPU.ProcessTrapApi.Observer
+virtual Cosmos.Kernel.Core.CPU.ProcessTrapApi.Observer.Invoke(ref Cosmos.Kernel.Core.CPU.ProcessTrapContext context) -> void
+static Cosmos.Kernel.Core.CPU.ProcessTrapApi.SetObserver(Cosmos.Kernel.Core.CPU.ProcessTrapApi.Observer? observer) -> void
+Cosmos.Kernel.Core.CPU.ProcessTrapContext
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.ProcessTrapContext() -> void
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.Vector -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.InstructionPointer -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.StackPointer -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.CodeSegment -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.StackSegment -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.Flags -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.FaultAddress -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.SyscallNumber -> ulong
+Cosmos.Kernel.Core.CPU.ProcessTrapContext.RescheduleRequested -> bool
 [COSMOS0001]const Cosmos.Kernel.Core.Scheduler.SchedulerManager.DefaultQuantumNs = 10000000 -> ulong
 [COSMOS0001]const Cosmos.Kernel.Core.Scheduler.SchedulerManager.NanosecondsPerMillisecond = 1000000 -> ulong
 [COSMOS0001]const Cosmos.Kernel.Core.Scheduler.SchedulerThread.DefaultStackSize = 262144 -> nuint

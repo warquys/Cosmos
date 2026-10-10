@@ -19,8 +19,46 @@ internal static class InterruptManager
     /// <param name="context">The interrupt context captured by the CPU.</param>
     public delegate void IrqDelegate(ref IRQContext context);
 
-    internal static IrqDelegate?[]? s_irqHandlers;
+    /// <summary>
+    /// Observer invoked from the existing interrupt dispatcher before normal
+    /// handler/fatal-exception processing. It is intended for a privileged
+    /// process runtime; it must not allocate, block, or throw.
+    /// </summary>
+    internal delegate void ProcessTrapDelegate(ref ProcessTrapContext context);
 
+    private static ProcessTrapDelegate? s_processTrapObserver;
+
+    /// <summary>Installs the single Ring/process observer owned by the kernel.</summary>
+    internal static void SetProcessTrapObserver(ProcessTrapDelegate? observer)
+    {
+        s_processTrapObserver = observer;
+    }
+
+    internal static void ObserveProcessTrap(ref IRQContext context)
+    {
+        if (s_processTrapObserver is null)
+        {
+            return;
+        }
+
+        // 0x80 and 0xEF syscall, 0x0E Page Fault, 0x0D General Protection Fault (GPF)
+        // TODO: should aim for syscall instruction and not 0x80
+        if (context.interrupt == 0xEF || context.interrupt == 0x0E || context.interrupt == 0x0D || context.interrupt == 0x80)
+        {
+#if !ARCH_ARM64
+            // 0x3 Current Privilege Level (CPL)
+            if ((context.cs & 0x3) != 0x3)
+            {
+                return;
+            }
+#endif
+            ProcessTrapContext processContext = ProcessTrapContext.From(ref context);
+            s_processTrapObserver.Invoke(ref processContext);
+            processContext.ApplyTo(ref context);
+        }
+    }
+
+    internal static IrqDelegate?[]? s_irqHandlers;
     private static IInterruptController? s_controller;
 
     private const string NewLine = "\n";
@@ -55,6 +93,10 @@ internal static class InterruptManager
 
         Serial.Write("[InterruptManager.Initialize] Initializing platform interrupt controller...\n");
         controller.Initialize();
+        if (!controller.IsInitialized)
+        {
+            throw new System.InvalidOperationException("Interrupt controller initialization failed.");
+        }
         Serial.Write("[InterruptManager.Initialize] Interrupt system ready\n");
     }
 

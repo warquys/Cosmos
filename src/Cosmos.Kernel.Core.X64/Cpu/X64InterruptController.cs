@@ -69,6 +69,8 @@ internal class X64InterruptController : IInterruptController
 
     public unsafe void Dispatch(ref IRQContext ctx)
     {
+        InterruptManager.ObserveProcessTrap(ref ctx);
+
         InterruptManager.IrqDelegate?[]? handlers = InterruptManager.s_irqHandlers;
         if (handlers != null && ctx.interrupt < (ulong)handlers.Length)
         {
